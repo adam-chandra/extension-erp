@@ -1,0 +1,16 @@
+# .vercelignore — files not uploaded to Vercel build context.
+# Keep parity with .gitignore plus drop Docker-only artifacts that Vercel won't use.
+node_modules
+dist
+.env
+.env.*
+!.env.production.example
+!.env.example
+Dockerfile
+docker-compose.yml
+docker-entrypoint.sh
+.dockerignore
+DOCKER_SETUP.md
+nginx.conf
+Jenkinsfile
+sonar-project.properties
