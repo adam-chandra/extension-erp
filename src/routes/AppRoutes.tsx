@@ -16,6 +16,7 @@ import { ReturPenjualan } from '@/pages/ReturPenjualan'
 import { BiayaPenjualan } from '@/pages/BiayaPenjualan'
 import { HomePage } from '@/pages/HomePage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
+import AssetDashboardPage from '@/pages/AssetDashboardPage'
 
 export function AppRoutes() {
   return (
@@ -31,6 +32,7 @@ export function AppRoutes() {
         <Route path={ROUTES.DASHBOARD_PROCUREMENT} element={<ProcurementDashboardPage />} />
         <Route path={ROUTES.DASHBOARD_ACCOUNTING} element={<FinanceAccountingDashboardPage />} />
         <Route path={ROUTES.DASHBOARD_HRIS} element={<HRISDashboardPage />} />
+        <Route path={ROUTES.DASHBOARD_ASSET} element={<AssetDashboardPage />} />
         <Route path={ROUTES.PURCHASE} element={<PurchasePage />} />
         <Route path={ROUTES.INVOICE} element={<InvoicePage />} />
         <Route path={ROUTES.LABEL} element={<LabelPage />} />

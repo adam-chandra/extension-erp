@@ -51,6 +51,8 @@ export function withWorkspaceLayout<P extends WorkspaceLayoutInjectedProps>(
       selectedModule === 'all' || selectedModule === 'accounting'
     const showHRIS =
       selectedModule === 'all' || selectedModule === 'hris'
+    const showAsset =
+      selectedModule === 'all' || selectedModule === 'asset'
     // const showCentralDashboard =
     //   selectedModule === 'all' || selectedModule === 'central-dashboard'
     // const showProcurement =
@@ -68,6 +70,7 @@ export function withWorkspaceLayout<P extends WorkspaceLayoutInjectedProps>(
       if (selectedModule === 'procurement') return 'Procurement'
       if (selectedModule === 'accounting') return 'Accounting'
       if (selectedModule === 'hris') return 'HRIS'
+      if (selectedModule === 'asset') return 'Asset'
       return 'Unknown Module'
     }, [selectedModule])
 
@@ -98,10 +101,17 @@ export function withWorkspaceLayout<P extends WorkspaceLayoutInjectedProps>(
         ROUTES.DASHBOARD_HRIS,
       ] as string[]
 
+      // Define Asset module pages
+      const assetPages = [
+        ROUTES.DASHBOARD_ASSET,
+      ] as string[]
+
       if (selectedModule === 'accounting' && !accountingPages.includes(currentPath)) {
         navigate(ROUTES.DASHBOARD_ACCOUNTING)
       } else if (selectedModule === 'hris' && !hrisPages.includes(currentPath)) {
         navigate(ROUTES.DASHBOARD_HRIS)
+      } else if (selectedModule === 'asset' && !assetPages.includes(currentPath)) {
+        navigate(ROUTES.DASHBOARD_ASSET)
       }
       // [PHASE1 hidden] central + procurement redirects disabled
       // if (selectedModule === 'procurement' && !procurementPages.includes(currentPath)) {
@@ -150,6 +160,7 @@ export function withWorkspaceLayout<P extends WorkspaceLayoutInjectedProps>(
             showProcurement={showProcurement}
             showAccounting={showAccounting}
             showHRIS={showHRIS}
+            showAsset={showAsset}
             onCompanyChange={setSelectedCompany}
             onModuleChange={setSelectedModule}
           />
@@ -174,6 +185,7 @@ export function withWorkspaceLayout<P extends WorkspaceLayoutInjectedProps>(
               showProcurement={showProcurement}
               showAccounting={showAccounting}
               showHRIS={showHRIS}
+              showAsset={showAsset}
               selectedCompany={selectedCompany}
               selectedModule={selectedModule}
             />

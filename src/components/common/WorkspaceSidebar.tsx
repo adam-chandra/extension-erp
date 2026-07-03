@@ -32,6 +32,7 @@ interface WorkspaceSidebarProps {
   showProcurement: boolean
   showAccounting: boolean
   showHRIS: boolean
+  showAsset: boolean
   onCompanyChange: (value: string) => void
   onModuleChange: (value: ModuleFilter) => void
 }
@@ -46,6 +47,7 @@ export function WorkspaceSidebar({
   showProcurement,
   showAccounting,
   showHRIS,
+  showAsset,
   onCompanyChange,
   onModuleChange,
 }: WorkspaceSidebarProps) {
@@ -170,6 +172,12 @@ export function WorkspaceSidebar({
                 className="data-[highlighted]:bg-[#ed8c2d]/20 data-[highlighted]:text-[#ffdcb9] data-[state=checked]:bg-[#ed8c2d]/25 data-[state=checked]:text-[#ffdcb9]"
               >
                 HRIS
+              </SelectItem>
+              <SelectItem
+                value="asset"
+                className="data-[highlighted]:bg-[#ed8c2d]/20 data-[highlighted]:text-[#ffdcb9] data-[state=checked]:bg-[#ed8c2d]/25 data-[state=checked]:text-[#ffdcb9]"
+              >
+                Asset
               </SelectItem>
             </SelectContent>
           </Select>
@@ -336,6 +344,42 @@ export function WorkspaceSidebar({
               >
                 <Users className="h-4 w-4" />
                 {!isSidebarCollapsed ? 'Dashboard HRIS' : null}
+              </NavLink>
+            )}
+          </div>
+        ) : null}
+
+        {showAsset ? (
+          <div className="space-y-1 pt-3">
+            {!isSidebarCollapsed ? (
+              <button
+                onClick={() => toggleModule('asset')}
+                className="flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400 transition hover:bg-slate-700/50 hover:text-slate-300"
+              >
+                <span>Modul Asset</span>
+                {expandedModules.asset ? (
+                  <ChevronDown className="h-3.5 w-3.5" />
+                ) : (
+                  <ChevronRight className="h-3.5 w-3.5" />
+                )}
+              </button>
+            ) : null}
+            {expandedModules.asset && (
+              <NavLink
+                to={ROUTES.DASHBOARD_ASSET}
+                className={({ isActive }) =>
+                  [
+                    'flex w-full items-center rounded-lg py-2 text-sm transition',
+                    isActive
+                      ? 'bg-[#ed8c2d] text-white'
+                      : 'text-slate-200 hover:bg-slate-700',
+                    isSidebarCollapsed ? 'justify-center px-2' : 'gap-3 px-3',
+                  ].join(' ')
+                }
+                title="Dashboard Asset"
+              >
+                <Users className="h-4 w-4" />
+                {!isSidebarCollapsed ? 'Dashboard Asset' : null}
               </NavLink>
             )}
           </div>

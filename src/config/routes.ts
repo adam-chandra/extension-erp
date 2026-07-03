@@ -5,6 +5,7 @@ export const ROUTES = {
   DASHBOARD_PROCUREMENT: '/dashboard/procurement',
   DASHBOARD_ACCOUNTING: '/dashboard/accounting',
   DASHBOARD_HRIS: '/dashboard/hris',
+  DASHBOARD_ASSET: '/dashboard/asset',
   PURCHASE: '/dashboard/purchase',
   INVOICE: '/dashboard/invoice',
   LABEL: '/dashboard/label',

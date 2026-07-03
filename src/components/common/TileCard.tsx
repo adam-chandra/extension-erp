@@ -66,12 +66,12 @@ export function TileCard({
       {/* Content with icon and value */}
       <div className="flex items-center gap-4 px-5 pb-4">
         {/* Icon */}
-        <div className={`flex items-center justify-center rounded-xl p-3 ${iconBgColor}`}>
+        <div className={`flex-shrink-0 flex items-center justify-center rounded-xl p-3 ${iconBgColor}`}>
           <Icon className={`h-8 w-8 ${iconColor}`} />
         </div>
 
         {/* Value */}
-        <span className="text-xl font-bold text-gray-900 leading-tight">{value}</span>
+        <span className="flex-1 min-w-0 text-xl font-bold text-gray-900 leading-tight break-words">{value}</span>
       </div>
     </>
   )
