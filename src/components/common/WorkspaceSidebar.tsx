@@ -7,6 +7,7 @@ import {
   ChevronDown,
   ChevronRight,
   Users,
+  ShoppingBasket,
 } from 'lucide-react'
 import { Label } from '@/components/ui/label'
 import {
@@ -154,13 +155,13 @@ export function WorkspaceSidebar({
               >
                 Central Dashboard
               </SelectItem>
+              */}
               <SelectItem
                 value="procurement"
                 className="data-[highlighted]:bg-[#ed8c2d]/20 data-[highlighted]:text-[#ffdcb9] data-[state=checked]:bg-[#ed8c2d]/25 data-[state=checked]:text-[#ffdcb9]"
               >
                 Procurement
               </SelectItem>
-              */}
               <SelectItem
                 value="accounting"
                 className="data-[highlighted]:bg-[#ed8c2d]/20 data-[highlighted]:text-[#ffdcb9] data-[state=checked]:bg-[#ed8c2d]/25 data-[state=checked]:text-[#ffdcb9]"
@@ -238,7 +239,7 @@ export function WorkspaceSidebar({
                   <Building className="h-4 w-4" />
                   {!isSidebarCollapsed ? 'Dashboard Procurement' : null}
                 </NavLink>
-                {/* <NavLink
+                <NavLink
                   to={ROUTES.PURCHASE}
                   className={({ isActive }) =>
                     [
@@ -253,7 +254,7 @@ export function WorkspaceSidebar({
                 >
                   <ShoppingBasket className="h-4 w-4" />
                   {!isSidebarCollapsed ? 'Purchase Order (PO)' : null}
-                </NavLink> */}
+                </NavLink>
               </>
             )}
           </div>

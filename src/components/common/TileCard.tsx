@@ -4,6 +4,8 @@ import { CardMenu } from './CardMenu'
 interface TileCardProps {
   title: string
   value: string
+  unit?: string
+  remarks?: string
   icon: LucideIcon
   iconBgColor?: string
   iconColor?: string
@@ -16,6 +18,8 @@ interface TileCardProps {
 export function TileCard({
   title,
   value,
+  unit,
+  remarks,
   icon: Icon,
   iconBgColor = 'bg-green-100',
   iconColor = 'text-green-600',
@@ -45,7 +49,7 @@ export function TileCard({
       <div className="flex items-start justify-between gap-3 px-5 pt-4 pb-2">
         <span className="flex-1 min-w-0 text-sm font-medium text-gray-500 line-clamp-2">{title}</span>
         {showMenu && (
-          <div 
+          <div
             className="flex-shrink-0 -mt-1"
             onClick={(e) => {
               e.stopPropagation()
@@ -64,15 +68,27 @@ export function TileCard({
       </div>
 
       {/* Content with icon and value */}
-      <div className="flex items-center gap-4 px-5 pb-4">
+      <div className="flex items-center gap-4 px-5 pb-3">
         {/* Icon */}
         <div className={`flex-shrink-0 flex items-center justify-center rounded-xl p-3 ${iconBgColor}`}>
           <Icon className={`h-8 w-8 ${iconColor}`} />
         </div>
 
-        {/* Value */}
-        <span className="flex-1 min-w-0 text-xl font-bold text-gray-900 leading-tight break-words">{value}</span>
+        {/* Value + Unit */}
+        <div className="flex-1 min-w-0">
+          <span className="block text-xl font-bold text-gray-900 leading-tight break-words">{value}</span>
+          {unit && (
+            <span className="block text-xs font-medium text-gray-400 mt-0.5">{unit}</span>
+          )}
+        </div>
       </div>
+
+      {/* Remarks footer */}
+      {remarks && (
+        <div className="border-t border-gray-100 px-5 py-2">
+          <p className="text-xs text-gray-400 italic leading-snug">{remarks}</p>
+        </div>
+      )}
     </>
   )
 

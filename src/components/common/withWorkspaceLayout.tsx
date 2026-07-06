@@ -12,6 +12,7 @@ export interface WorkspaceLayoutInjectedProps {
   showProcurement: boolean
   showAccounting: boolean
   showHRIS: boolean
+  showAsset: boolean
   selectedCompany?: string
   selectedModule?: ModuleFilter
 }
@@ -43,10 +44,11 @@ export function withWorkspaceLayout<P extends WorkspaceLayoutInjectedProps>(
       setSelectedCompany(String(fallback.sourceId))
     }, [companies, selectedCompany, setSelectedCompany])
 
-    // [PHASE1] Only accounting + hris are exposed. Central + Procurement
-    // are force-hidden but their code is kept for later phases.
+    // Central dashboard is still hidden for now, while module-level dashboards
+    // (including procurement) are exposed based on selected module.
     const showCentralDashboard = false
-    const showProcurement = false
+    const showProcurement =
+      selectedModule === 'all' || selectedModule === 'procurement'
     const showAccounting =
       selectedModule === 'all' || selectedModule === 'accounting'
     const showHRIS =
@@ -90,11 +92,10 @@ export function withWorkspaceLayout<P extends WorkspaceLayoutInjectedProps>(
       ] as string[]
 
       // Define procurement module pages
-      // [PHASE1 hidden]
-      // const procurementPages = [
-      //   ROUTES.DASHBOARD_PROCUREMENT,
-      //   ROUTES.PURCHASE,
-      // ] as string[]
+      const procurementPages = [
+        ROUTES.DASHBOARD_PROCUREMENT,
+        ROUTES.PURCHASE,
+      ] as string[]
 
       // Define HRIS module pages
       const hrisPages = [
@@ -108,15 +109,15 @@ export function withWorkspaceLayout<P extends WorkspaceLayoutInjectedProps>(
 
       if (selectedModule === 'accounting' && !accountingPages.includes(currentPath)) {
         navigate(ROUTES.DASHBOARD_ACCOUNTING)
+      } else if (selectedModule === 'procurement' && !procurementPages.includes(currentPath)) {
+        navigate(ROUTES.DASHBOARD_PROCUREMENT)
       } else if (selectedModule === 'hris' && !hrisPages.includes(currentPath)) {
         navigate(ROUTES.DASHBOARD_HRIS)
       } else if (selectedModule === 'asset' && !assetPages.includes(currentPath)) {
         navigate(ROUTES.DASHBOARD_ASSET)
       }
-      // [PHASE1 hidden] central + procurement redirects disabled
-      // if (selectedModule === 'procurement' && !procurementPages.includes(currentPath)) {
-      //   navigate(ROUTES.DASHBOARD_PROCUREMENT)
-      // } else if (selectedModule === 'central-dashboard' && currentPath !== ROUTES.DASHBOARD) {
+      // [PHASE1 hidden] central dashboard redirect disabled
+      // if (selectedModule === 'central-dashboard' && currentPath !== ROUTES.DASHBOARD) {
       //   navigate(ROUTES.DASHBOARD)
       // }
       // Don't redirect for 'all' - let user stay on current page

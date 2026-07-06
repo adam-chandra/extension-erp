@@ -16,9 +16,11 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   })
   
   const [selectedModule, setSelectedModuleState] = useState<ModuleFilter>(() => {
-    // [PHASE1] Only allow accounting + hris. Normalize stale values.
+    // [PHASE1+] Allow accounting, hris, procurement, and asset modules.
     const stored = localStorage.getItem('selectedModule') as ModuleFilter | null
-    if (stored === 'accounting' || stored === 'hris') return stored
+    if (stored === 'accounting' || stored === 'hris' || stored === 'procurement' || stored === 'asset') {
+      return stored
+    }
     return 'accounting'
     // return (localStorage.getItem('selectedModule') as ModuleFilter) || 'all'
   })
