@@ -15,6 +15,8 @@ export interface HrisKPI {
   totalIzin: number
   totalAlfa: number
   totalTelat: number
+  newHires?: number
+  turnoverRate?: number
 }
 
 export interface HrisSCIAMonthlyPt {
@@ -31,11 +33,43 @@ export interface HrisAttendanceMonthlyPt {
   lateCount: number
 }
 
+export interface HrisDeptHeadcountPt {
+  departmentName: string
+  count: number
+}
+
+export interface HrisRecruitmentPt {
+  month: string
+  count: number
+}
+
+export interface HrisSalaryByDeptPt {
+  departmentName: string
+  totalSalary: number
+}
+
+export interface HrisAttendanceTrendPt {
+  month: string
+  rate: number
+}
+
+export interface HrisWorkforceTrendPt {
+  month: string
+  employees: number
+  hires: number
+  exits: number
+}
+
 export interface HrisDashboard {
   companyId: number
   kpi: HrisKPI
   sciaMonthly: HrisSCIAMonthlyPt[]
   attendanceMonthly: HrisAttendanceMonthlyPt[]
+  deptHeadcount?: HrisDeptHeadcountPt[]
+  recruitment?: HrisRecruitmentPt[]
+  salaryByDept?: HrisSalaryByDeptPt[]
+  attendanceTrend?: HrisAttendanceTrendPt[]
+  workforceTrend?: HrisWorkforceTrendPt[]
 }
 
 export const hrisService = {

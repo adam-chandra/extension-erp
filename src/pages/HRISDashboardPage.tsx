@@ -143,7 +143,8 @@ function HRISDashboardContent({ selectedCompany }: WorkspaceLayoutInjectedProps 
   const companyId = selectedCompany ? Number(selectedCompany) : null
   const validCompanyId = companyId && Number.isFinite(companyId) && companyId > 0 ? companyId : null
 
-  const dashboardQuery = useHrisDashboard(validCompanyId)
+  const year = new Date().getFullYear()
+  const dashboardQuery = useHrisDashboard(validCompanyId, year)
   const data = dashboardQuery.data
   const kpi = data?.kpi
 
@@ -247,7 +248,7 @@ function HRISDashboardContent({ selectedCompany }: WorkspaceLayoutInjectedProps 
         />
         <TileCard
           title="Attendance Rate"
-          value={isLoading ? 'Memuat…' : `${(kpi?.attendanceRate ?? 0).toFixed(1)}%`}
+          value={isLoading ? 'Memuat…' : `${(kpi?.attendanceRateYtd ?? 0).toFixed(1)}%`}
           icon={UserCheck}
           iconBgColor="bg-green-100"
           iconColor="text-green-600"
