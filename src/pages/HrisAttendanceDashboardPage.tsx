@@ -283,7 +283,7 @@ function AttendanceRateCard({
               tickFormatter={(v: number) => `${v}%`}
             />
             <Tooltip
-              formatter={(v: number) => [`${v}%`, 'Attendance Rate']}
+              formatter={(v) => [typeof v === 'number' ? `${v}%` : '', 'Attendance Rate']}
               contentStyle={{ borderRadius: 8, fontSize: 12, border: '1px solid #e2e8f0' }}
             />
             <ReferenceLine y={avg} stroke="#10b981" strokeDasharray="4 4" strokeWidth={1.5} />
@@ -291,7 +291,7 @@ function AttendanceRateCard({
               dataKey="rate"
               name="Attendance Rate"
               radius={[6, 6, 0, 0]}
-              label={{ position: 'top', fontSize: 11, fontWeight: 600, fill: '#374151', formatter: (v: number) => `${v}%` }}
+              label={{ position: 'top', fontSize: 11, fontWeight: 600, fill: '#374151', formatter: (v: unknown) => typeof v === 'number' ? `${v}%` : '' }}
               fill="#3b82f6"
             />
           </BarChart>
@@ -367,7 +367,7 @@ function KasusTelatCard({
               <XAxis dataKey="label" tick={{ fontSize: 10, fill: '#6b7280' }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 10, fill: '#6b7280' }} axisLine={false} tickLine={false} />
               <Tooltip
-                formatter={(v: number) => [v.toLocaleString('id-ID'), 'Kasus Telat']}
+                formatter={(v) => [typeof v === 'number' ? v.toLocaleString('id-ID') : '', 'Kasus Telat']}
                 contentStyle={{ borderRadius: 8, fontSize: 12, border: '1px solid #e2e8f0' }}
               />
               <Area
@@ -377,7 +377,7 @@ function KasusTelatCard({
                 strokeWidth={2}
                 fill="url(#telatGradient)"
                 dot={{ r: 4, fill: '#8b5cf6', strokeWidth: 0 }}
-                label={{ position: 'top', fontSize: 10, fontWeight: 600, fill: '#6b7280', formatter: (v: number) => v.toLocaleString('id-ID') }}
+                label={{ position: 'top', fontSize: 10, fontWeight: 600, fill: '#6b7280', formatter: (v: unknown) => typeof v === 'number' ? v.toLocaleString('id-ID') : '' }}
               />
             </AreaChart>
           </ResponsiveContainer>
