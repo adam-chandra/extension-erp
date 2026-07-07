@@ -6,7 +6,7 @@ import { LoginPage } from '@/pages/LoginPage'
 import { CentralDashboard } from '@/pages/CentralDashboard'
 import { ProcurementDashboardPage } from '@/pages/ProcurementDashboardPage'
 import { FinanceAccountingDashboardPage } from '@/pages/FinanceAccountingDashboardPage'
-import HRISDashboardPage from '@/pages/HRISDashboardPage'
+import HrisAttendanceDashboardPage from '@/pages/HrisAttendanceDashboardPage'
 import { PurchasePage } from '@/pages/PurchasePage'
 import { InvoicePage } from '@/pages/InvoicePage'
 import { LabelPage } from '@/pages/LabelPage'
@@ -31,7 +31,7 @@ export function AppRoutes() {
         <Route path={ROUTES.DASHBOARD} element={<CentralDashboard />} />
         <Route path={ROUTES.DASHBOARD_PROCUREMENT} element={<ProcurementDashboardPage />} />
         <Route path={ROUTES.DASHBOARD_ACCOUNTING} element={<FinanceAccountingDashboardPage />} />
-        <Route path={ROUTES.DASHBOARD_HRIS} element={<HRISDashboardPage />} />
+        <Route path={ROUTES.DASHBOARD_HRIS} element={<HrisAttendanceDashboardPage />} />
         <Route path={ROUTES.DASHBOARD_ASSET} element={<AssetDashboardPage />} />
         <Route path={ROUTES.PURCHASE} element={<PurchasePage />} />
         <Route path={ROUTES.INVOICE} element={<InvoicePage />} />

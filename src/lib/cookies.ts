@@ -35,11 +35,11 @@ export const tokenStorage = {
   getRefreshToken: () => cookieStorage.get(COOKIE_KEYS.REFRESH_TOKEN),
   setTokens: (accessToken: string, refreshToken?: string) => {
     cookieStorage.set(COOKIE_KEYS.ACCESS_TOKEN, accessToken, {
-      expires: 1, // 1 day
+      expires: 30, // 30 days
     })
     if (refreshToken) {
       cookieStorage.set(COOKIE_KEYS.REFRESH_TOKEN, refreshToken, {
-        expires: 7, // 7 days
+        expires: 30, // 30 days
       })
     }
   },

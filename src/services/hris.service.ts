@@ -8,54 +8,40 @@ interface ApiEnvelope<T> {
 
 export interface HrisKPI {
   totalEmployees: number
-  attendanceRate: number
-  newHires: number
-  turnoverRate: number
+  attendanceRateYtd: number     // avg rate for period
+  attendanceRatePrevYtd: number // same period prev year
+  totalSakit: number
+  totalCuti: number
+  totalIzin: number
+  totalAlfa: number
+  totalTelat: number
 }
 
-export interface HrisDeptHeadcount {
-  departmentId: number
-  departmentName: string
-  count: number
-}
-
-export interface HrisMonthlyCount {
+export interface HrisSCIAMonthlyPt {
   month: string // YYYY-MM
-  count: number
+  sakit: number
+  cuti: number
+  izin: number
+  alfa: number
 }
 
-export interface HrisDeptSalary {
-  departmentId: number
-  departmentName: string
-  totalSalary: number
-}
-
-export interface HrisAttendanceTrendPt {
-  month: string
-  rate: number
-}
-
-export interface HrisWorkforceTrendPt {
-  month: string
-  employees: number
-  hires: number
-  exits: number
+export interface HrisAttendanceMonthlyPt {
+  month: string  // YYYY-MM
+  rate: number   // %
+  lateCount: number
 }
 
 export interface HrisDashboard {
   companyId: number
   kpi: HrisKPI
-  deptHeadcount: HrisDeptHeadcount[]
-  recruitment: HrisMonthlyCount[]
-  salaryByDept: HrisDeptSalary[]
-  attendanceTrend: HrisAttendanceTrendPt[]
-  workforceTrend: HrisWorkforceTrendPt[]
+  sciaMonthly: HrisSCIAMonthlyPt[]
+  attendanceMonthly: HrisAttendanceMonthlyPt[]
 }
 
 export const hrisService = {
-  async dashboard(companyId: number): Promise<HrisDashboard> {
+  async dashboard(companyId: number, year: number): Promise<HrisDashboard> {
     const { data } = await apiClient.get<ApiEnvelope<HrisDashboard>>('/hris/dashboard', {
-      params: { companyId },
+      params: { companyId, year },
     })
     return data.data
   },

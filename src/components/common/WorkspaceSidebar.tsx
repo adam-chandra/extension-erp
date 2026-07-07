@@ -8,6 +8,7 @@ import {
   ChevronRight,
   Users,
   ShoppingBasket,
+  CalendarCheck,
 } from 'lucide-react'
 import { Label } from '@/components/ui/label'
 import {
@@ -341,10 +342,10 @@ export function WorkspaceSidebar({
                     isSidebarCollapsed ? 'justify-center px-2' : 'gap-3 px-3',
                   ].join(' ')
                 }
-                title="Dashboard HRIS"
+                title="HC Attendance Dashboard"
               >
-                <Users className="h-4 w-4" />
-                {!isSidebarCollapsed ? 'Dashboard HRIS' : null}
+                <CalendarCheck className="h-4 w-4" />
+                {!isSidebarCollapsed ? 'HC Attendance Dashboard' : null}
               </NavLink>
             )}
           </div>
