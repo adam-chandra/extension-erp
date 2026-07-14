@@ -1,18 +1,30 @@
-# Per-project compose for running FE in isolation during development.
-# For full-stack orchestration use the root docker-compose.yml.
+version: '3.8'
 
 services:
+  # --- FRONTEND APPLICATION ---
   fe:
+    container_name: fe-extension-erp-dev
+    # PENTING: Gunakan variable ini agar Docker mengambil image yg dipush Jenkins
     image: ${FULL_IMAGE_NAME}
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: fe-extension-erp
-    environment:
-      # Runtime config: injected into window.__ENV__ by the container
-      # entrypoint at startup. Change this and restart the container —
-      # NO rebuild needed.
-      API_BASE_URL: ${API_BASE_URL:-https://api-extension-hm.ethos.co.id/api}
+    restart: unless-stopped
     ports:
       - "${FE_HOST_PORT:-9194}:80"
-    restart: unless-stopped
+
+    # Runtime config: injected into window.__ENV__ by the container
+    # entrypoint at startup. Change this and restart the container — NO rebuild needed.
+    environment:
+      API_BASE_URL: ${API_BASE_URL:-https://api-extension-hm.ethos.co.id/api}
+
+    networks:
+      - fe-extension-network
+
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost/healthz"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+networks:
+  fe-extension-network:
+    driver: bridge

@@ -3,6 +3,7 @@ export const ROUTES = {
   LOGIN: '/login',
   DASHBOARD: '/dashboard',
   DASHBOARD_PROCUREMENT: '/dashboard/procurement',
+  PROCUREMENT_DETAIL: '/dashboard/procurement/detail',
   DASHBOARD_ACCOUNTING: '/dashboard/accounting',
   DASHBOARD_HRIS: '/dashboard/hris',
   DASHBOARD_ASSET: '/dashboard/asset',
@@ -13,6 +14,8 @@ export const ROUTES = {
   POTONGAN_PENJUALAN: '/dashboard/potongan-penjualan',
   RETUR_PENJUALAN: '/dashboard/retur-penjualan',
   BIAYA_PENJUALAN: '/dashboard/biaya-penjualan',
+  PROFIT_LOSS: '/dashboard/consolidation/profit-loss',
+  BALANCE_SHEET: '/dashboard/consolidation/balance-sheet',
   NOT_FOUND: '*',
 } as const
 

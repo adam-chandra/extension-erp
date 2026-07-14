@@ -7,6 +7,8 @@ import {
   ChevronDown,
   ChevronRight,
   Users,
+  Scale,
+  TrendingUp,
   ShoppingBasket,
   CalendarCheck,
 } from 'lucide-react'
@@ -58,14 +60,16 @@ export function WorkspaceSidebar({
     accounting: boolean
     hris: boolean
     asset: boolean
+    consolidation: boolean
   }>({
     procurement: true,
     accounting: true,
     hris: true,
     asset: true,
+    consolidation: true,
   })
 
-  const toggleModule = (module: 'procurement' | 'accounting' | 'hris' | 'asset') => {
+  const toggleModule = (module: 'procurement' | 'accounting' | 'hris' | 'asset' | 'consolidation') => {
     setExpandedModules((prev) => ({
       ...prev,
       [module]: !prev[module],
@@ -262,57 +266,112 @@ export function WorkspaceSidebar({
         ) : null}
 
         {showAccounting ? (
-          <div className="space-y-1 pt-3">
-            {!isSidebarCollapsed ? (
-              <button
-                onClick={() => toggleModule('accounting')}
-                className="flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400 transition hover:bg-slate-700/50 hover:text-slate-300"
-              >
-                <span>Modul Accounting</span>
-                {expandedModules.accounting ? (
-                  <ChevronDown className="h-3.5 w-3.5" />
-                ) : (
-                  <ChevronRight className="h-3.5 w-3.5" />
-                )}
-              </button>
-            ) : null}
-            {expandedModules.accounting && (
-              <>
-                <NavLink
-                  to={ROUTES.DASHBOARD_ACCOUNTING}
-                  className={({ isActive }) =>
-                    [
-                      'flex w-full items-center rounded-lg py-2 text-sm transition',
-                      isActive
-                        ? 'bg-[#ed8c2d] text-white'
-                        : 'text-slate-200 hover:bg-slate-700',
-                      isSidebarCollapsed ? 'justify-center px-2' : 'gap-3 px-3',
-                    ].join(' ')
-                  }
-                  title="Dashboard Finance & Accounting"
+          <>
+            <div className="space-y-1 pt-3">
+              {!isSidebarCollapsed ? (
+                <button
+                  onClick={() => toggleModule('accounting')}
+                  className="flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400 transition hover:bg-slate-700/50 hover:text-slate-300"
                 >
-                  <Wallet className="h-4 w-4" />
-                  {!isSidebarCollapsed ? 'Dashboard Finance & Accounting' : null}
-                </NavLink>
-                {/* <NavLink
-                  to={ROUTES.INVOICE}
-                  className={({ isActive }) =>
-                    [
-                      'flex w-full items-center rounded-lg py-2 text-sm transition',
-                      isActive
-                        ? 'bg-[#ed8c2d] text-white'
-                        : 'text-slate-200 hover:bg-slate-700',
-                      isSidebarCollapsed ? 'justify-center px-2' : 'gap-3 px-3',
-                    ].join(' ')
-                  }
-                  title="Invoice Tracking"
+                  <span>Modul Accounting</span>
+                  {expandedModules.accounting ? (
+                    <ChevronDown className="h-3.5 w-3.5" />
+                  ) : (
+                    <ChevronRight className="h-3.5 w-3.5" />
+                  )}
+                </button>
+              ) : null}
+              {expandedModules.accounting && (
+                <>
+                  <NavLink
+                    to={ROUTES.DASHBOARD_ACCOUNTING}
+                    className={({ isActive }) =>
+                      [
+                        'flex w-full items-center rounded-lg py-2 text-sm transition',
+                        isActive
+                          ? 'bg-[#ed8c2d] text-white'
+                          : 'text-slate-200 hover:bg-slate-700',
+                        isSidebarCollapsed ? 'justify-center px-2' : 'gap-3 px-3',
+                      ].join(' ')
+                    }
+                    title="Dashboard Finance & Accounting"
+                  >
+                    <Wallet className="h-4 w-4" />
+                    {!isSidebarCollapsed ? 'Dashboard Finance & Accounting' : null}
+                  </NavLink>
+                  {/* <NavLink
+                    to={ROUTES.INVOICE}
+                    className={({ isActive }) =>
+                      [
+                        'flex w-full items-center rounded-lg py-2 text-sm transition',
+                        isActive
+                          ? 'bg-[#ed8c2d] text-white'
+                          : 'text-slate-200 hover:bg-slate-700',
+                        isSidebarCollapsed ? 'justify-center px-2' : 'gap-3 px-3',
+                      ].join(' ')
+                    }
+                    title="Invoice Tracking"
+                  >
+                    <FileText className="h-4 w-4" />
+                    {!isSidebarCollapsed ? 'Invoice Tracking' : null}
+                  </NavLink> */}
+                </>
+              )}
+            </div>
+
+            <div className="space-y-1 pt-3">
+              {!isSidebarCollapsed ? (
+                <button
+                  onClick={() => toggleModule('consolidation')}
+                  className="flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400 transition hover:bg-slate-700/50 hover:text-slate-300"
                 >
-                  <FileText className="h-4 w-4" />
-                  {!isSidebarCollapsed ? 'Invoice Tracking' : null}
-                </NavLink> */}
-              </>
-            )}
-          </div>
+                  <span>Consolidation</span>
+                  {expandedModules.consolidation ? (
+                    <ChevronDown className="h-3.5 w-3.5" />
+                  ) : (
+                    <ChevronRight className="h-3.5 w-3.5" />
+                  )}
+                </button>
+              ) : null}
+              {expandedModules.consolidation && (
+                <>
+                  <NavLink
+                    to={ROUTES.PROFIT_LOSS}
+                    className={({ isActive }) =>
+                      [
+                        'flex w-full items-center rounded-lg py-2 text-sm transition',
+                        isActive
+                          ? 'bg-[#ed8c2d] text-white'
+                          : 'text-slate-200 hover:bg-slate-700',
+                        isSidebarCollapsed ? 'justify-center px-2' : 'gap-3 px-3',
+                      ].join(' ')
+                    }
+                    title="Profit & Loss"
+                  >
+                    <TrendingUp className="h-4 w-4" />
+                    {!isSidebarCollapsed ? 'Profit & Loss' : null}
+                  </NavLink>
+
+                  <NavLink
+                    to={ROUTES.BALANCE_SHEET}
+                    className={({ isActive }) =>
+                      [
+                        'flex w-full items-center rounded-lg py-2 text-sm transition',
+                        isActive
+                          ? 'bg-[#ed8c2d] text-white'
+                          : 'text-slate-200 hover:bg-slate-700',
+                        isSidebarCollapsed ? 'justify-center px-2' : 'gap-3 px-3',
+                      ].join(' ')
+                    }
+                    title="Balance Sheet"
+                  >
+                    <Scale className="h-4 w-4" />
+                    {!isSidebarCollapsed ? 'Balance Sheet' : null}
+                  </NavLink>
+                </>
+              )}
+            </div>
+          </>
         ) : null}
 
         {showHRIS ? (
@@ -387,44 +446,46 @@ export function WorkspaceSidebar({
           </div>
         ) : null}
 
-        <div className="space-y-1 pt-3">
-          {!isSidebarCollapsed ? (
-            <button
-              onClick={() => toggleModule('asset')}
-              className="flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400 transition hover:bg-slate-700/50 hover:text-slate-300"
-            >
-              <span>Asset</span>
-              {expandedModules.asset ? (
-                <ChevronDown className="h-3.5 w-3.5" />
-              ) : (
-                <ChevronRight className="h-3.5 w-3.5" />
-              )}
-            </button>
-          ) : null}
-          {expandedModules.asset && (
-            <NavLink
-              to={ROUTES.LABEL}
-              className={({ isActive }) =>
-                [
-                  'flex w-full items-center rounded-lg py-2 text-sm transition',
-                  isActive
-                    ? 'bg-[#ed8c2d] text-white'
-                    : 'text-slate-200 hover:bg-slate-700',
-                  isSidebarCollapsed ? 'justify-center px-2' : 'gap-3 px-3',
-                ].join(' ')
-              }
-              title="Label Asset"
-            >
-              <Tag className="h-4 w-4" />
-              {!isSidebarCollapsed ? 'Label Asset' : null}
-              {!isSidebarCollapsed ? (
-                <span className="ml-auto rounded bg-[#ed8c2d]/20 px-1.5 py-0.5 text-[10px] text-[#ed8c2d]">
-                  MVP
-                </span>
-              ) : null}
-            </NavLink>
-          )}
-        </div>
+        {selectedModule !== 'hris' && (
+          <div className="space-y-1 pt-3">
+            {!isSidebarCollapsed ? (
+              <button
+                onClick={() => toggleModule('asset')}
+                className="flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400 transition hover:bg-slate-700/50 hover:text-slate-300"
+              >
+                <span>Asset</span>
+                {expandedModules.asset ? (
+                  <ChevronDown className="h-3.5 w-3.5" />
+                ) : (
+                  <ChevronRight className="h-3.5 w-3.5" />
+                )}
+              </button>
+            ) : null}
+            {expandedModules.asset && (
+              <NavLink
+                to={ROUTES.LABEL}
+                className={({ isActive }) =>
+                  [
+                    'flex w-full items-center rounded-lg py-2 text-sm transition',
+                    isActive
+                      ? 'bg-[#ed8c2d] text-white'
+                      : 'text-slate-200 hover:bg-slate-700',
+                    isSidebarCollapsed ? 'justify-center px-2' : 'gap-3 px-3',
+                  ].join(' ')
+                }
+                title="Label Asset"
+              >
+                <Tag className="h-4 w-4" />
+                {!isSidebarCollapsed ? 'Label Asset' : null}
+                {!isSidebarCollapsed ? (
+                  <span className="ml-auto rounded bg-[#ed8c2d]/20 px-1.5 py-0.5 text-[10px] text-[#ed8c2d]">
+                    MVP
+                  </span>
+                ) : null}
+              </NavLink>
+            )}
+          </div>
+        )}
       </nav>
     </aside>
   )

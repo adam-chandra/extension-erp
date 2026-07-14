@@ -42,16 +42,17 @@ const kpiIconMap = {
   search: Search,
 } as const;
 
+function formatAssetValue(item: AssetKpiItem): string | number {
+  if (typeof item.value !== "number") return item.value;
+  if (item.label === "Total Asset Value") return formatCurrency(item.value);
+  return formatNumber(item.value);
+}
+
 function buildAssetSummary(kpis: AssetKpiItem[]): SummaryCardProps[] {
   return kpis.map((item) => ({
     icon: kpiIconMap[item.icon],
     label: item.label,
-    value:
-      typeof item.value === "number"
-        ? item.label === "Total Asset Value"
-          ? formatCurrency(item.value)
-          : formatNumber(item.value)
-        : item.value,
+    value: formatAssetValue(item),
     unitLabel:
       item.label === "Total Asset Value" && typeof item.value === "number"
         ? formatCurrencyIDR(item.value)

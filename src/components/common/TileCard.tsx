@@ -1,18 +1,21 @@
-import type { LucideIcon } from 'lucide-react'
-import { CardMenu } from './CardMenu'
+import type { LucideIcon } from "lucide-react";
+import { CardMenu } from "./CardMenu";
 
 interface TileCardProps {
-  title: string
-  value: string
-  unit?: string
-  remarks?: string
-  icon: LucideIcon
-  iconBgColor?: string
-  iconColor?: string
-  cardId?: string
-  module?: 'central-dashboard' | 'procurement' | 'accounting' | 'hris'
-  customMenu?: React.ReactNode
-  onClick?: () => void
+  title: string;
+  value: string;
+  unit?: string;
+  remarks?: string;
+  icon: LucideIcon;
+  iconBgColor?: string;
+  iconColor?: string;
+  cardId?: string;
+  module?: "central-dashboard" | "procurement" | "accounting" | "hris";
+  customMenu?: React.ReactNode;
+  onClick?: () => void;
+  hasLeftAccent?: boolean;
+  alignUnit?: "inline" | "below";
+  hideIcon?: boolean;
 }
 
 export function TileCard({
@@ -21,94 +24,119 @@ export function TileCard({
   unit,
   remarks,
   icon: Icon,
-  iconBgColor = 'bg-green-100',
-  iconColor = 'text-green-600',
+  iconBgColor = "bg-green-100",
+  iconColor = "text-green-600",
   cardId,
   module,
   customMenu,
   onClick,
-}: TileCardProps) {
-  const showMenu = customMenu || (cardId && module)
-
-  const handleClick = () => {
-    if (onClick) {
-      onClick()
-    }
-  }
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (onClick && (e.key === 'Enter' || e.key === ' ')) {
-      e.preventDefault()
-      onClick()
-    }
-  }
+  hasLeftAccent = false,
+  alignUnit = "below",
+  hideIcon = false,
+}: Readonly<TileCardProps>) { 
+  const showMenu = customMenu || (cardId && module);
 
   const content = (
-    <>
-      {/* Header with title and menu */}
-      <div className="flex items-start justify-between gap-3 px-5 pt-4 pb-2">
-        <span className="flex-1 min-w-0 text-sm font-medium text-gray-500 line-clamp-2">{title}</span>
-        {showMenu && (
-          <div
-            className="flex-shrink-0 -mt-1"
-            onClick={(e) => {
-              e.stopPropagation()
-              e.preventDefault()
-            }}
-          >
-            {customMenu || (
-              <CardMenu
-                cardId={cardId!}
-                cardType="tile"
-                cardData={{ title, value, icon: Icon.name, iconBgColor, iconColor }}
-              />
-            )}
-          </div>
-        )}
-      </div>
+    <div className="flex flex-col h-full">
+      {/* Decorative background element */}
+      <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-gradient-to-br from-slate-100 to-transparent opacity-50 blur-xl transition-all duration-500 group-hover:scale-150 group-hover:opacity-80 pointer-events-none z-0" />
 
-      {/* Content with icon and value */}
-      <div className="flex items-center gap-4 px-5 pb-3">
-        {/* Icon */}
-        <div className={`flex-shrink-0 flex items-center justify-center rounded-xl p-3 ${iconBgColor}`}>
-          <Icon className={`h-8 w-8 ${iconColor}`} />
-        </div>
+      {/* Main content area — vertically centered */}
+      <div className="flex-1 flex flex-col justify-center">
+        {/* Header with title and menu */}
+        <div className="relative z-10 flex items-start justify-between gap-2 px-4 sm:px-5 pt-4 sm:pt-5 pb-1 sm:pb-2">
+          <span className="flex-1 min-w-0 text-[11px] sm:text-xs font-bold tracking-widest uppercase text-slate-500 line-clamp-2">
+            {title}
+          </span>
 
-        {/* Value + Unit */}
-        <div className="flex-1 min-w-0">
-          <span className="block text-xl font-bold text-gray-900 leading-tight break-words">{value}</span>
-          {unit && (
-            <span className="block text-xs font-medium text-gray-400 mt-0.5">{unit}</span>
+          {showMenu && (
+            <span className="flex-shrink-0 -mt-1">
+              {customMenu || (
+                <CardMenu
+                  cardId={cardId!}
+                  cardType="tile"
+                  cardData={{
+                    title,
+                    value,
+                    unit,
+                    remarks,
+                    icon: Icon.name,
+                    iconBgColor,
+                    iconColor,
+                  }}
+                />
+              )}
+            </span>
           )}
         </div>
+
+        {/* Content with icon and value */}
+        <div className="relative z-10 flex items-center gap-3 sm:gap-4 px-4 sm:px-5 pb-4 sm:pb-5">
+          {!hideIcon && (
+            <div
+              className={`flex-shrink-0 flex items-center justify-center rounded-xl sm:rounded-xl p-3 sm:p-3.5 ${iconBgColor} shadow-inner transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-3`}
+            >
+              <Icon className={`h-6 w-6 sm:h-7 sm:w-7 ${iconColor}`} />
+            </div>
+          )}
+
+          {/* Value + Unit */}
+          <div className="flex-1 min-w-0 flex flex-col justify-center">
+            {alignUnit === "inline" ? (
+              <div className="flex items-baseline gap-1.5">
+                <span className="block text-lg sm:text-2xl font-bold tracking-tight text-slate-800 leading-none break-words">
+                  {value}
+                </span>
+                {unit && (
+                  <span className="block text-xs sm:text-sm font-semibold mt-1 leading-none text-slate-500">
+                    {unit}
+                  </span>
+                )}
+              </div>
+            ) : (
+              <div>
+                <span className="block text-lg sm:text-2xl font-bold tracking-tight text-slate-800 leading-none break-words">
+                  {value}
+                </span>
+                {unit && (
+                  <span className="block text-xs sm:text-sm font-semibold mt-1.5 text-slate-500">
+                    {unit}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
-      {/* Remarks footer */}
+      {/* Remarks footer — pinned to bottom */}
       {remarks && (
-        <div className="border-t border-gray-100 px-5 py-2">
-          <p className="text-xs text-gray-400 italic leading-snug">{remarks}</p>
+        <div className="relative z-10 border-t border-slate-100/80 bg-slate-50/50 px-4 sm:px-5 py-2.5 sm:py-3 transition-colors duration-300 group-hover:bg-slate-50 mt-auto text-slate-500/90">
+          <p className="text-[11px] sm:text-xs font-medium leading-relaxed">
+            {remarks}
+          </p>
         </div>
       )}
-    </>
-  )
+    </div>
+  );
+
+  const baseClasses = `relative overflow-hidden rounded-xl border bg-white border-slate-200/60 w-full h-full flex flex-col transition-all duration-300 ${
+    hasLeftAccent ? "border-l-4 border-l-red-600" : ""
+  }`;
 
   if (onClick) {
     return (
-      <div
-        onClick={handleClick}
-        onKeyDown={handleKeyDown}
-        role="button"
-        tabIndex={0}
-        className="overflow-hidden rounded-2xl bg-white shadow-md w-full cursor-pointer transition-transform hover:scale-[1.02] hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+      <button
+        type="button"
+        onClick={onClick}
+        className={`${baseClasses} cursor-pointer hover:-translate-y-1.5 hover:shadow-xl hover:shadow-slate-200/50 hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 group text-left`}
       >
         {content}
-      </div>
-    )
+      </button>
+    );
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl bg-white shadow-md w-full">
-      {content}
-    </div>
-  )
+    <div className={`${baseClasses} group hover:shadow-md`}>{content}</div>
+  );
 }

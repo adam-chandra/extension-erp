@@ -2,15 +2,19 @@ import { apiClient } from "@/lib/axios";
 import type {
   ProcurementFilters,
   ProcurementDashboardResponse,
+  PaginatedDocuments,
+  MetricType,
+  Metric,
   MetricCard,
+  TrendDataPoint,
+  PurchaseTrendYTDDataPoint,
+  ProcurementDashboardData,
 } from "@/types/procurement";
 import {
   getMockProcurementDashboard,
   getMockPOCycleTimeTrend,
   getMockPurchaseTrendYTD,
   procurementMetricConfig,
-  type PurchaseTrendYTDDataPoint,
-  type TrendDataPoint,
 } from "@/data/procurement-mock";
 
 interface ApiEnvelope<T> {
@@ -19,35 +23,66 @@ interface ApiEnvelope<T> {
   data: T;
 }
 
-// Frontend UI model - with styling applied
-export interface ProcurementDashboardData {
-  costSaving: MetricCard;
-  savingRate: MetricCard;
-  otdRate: MetricCard;
-  poCycleTime: MetricCard;
+function isBlankMetricValue(value: unknown): boolean {
+  return value === undefined || value === null || value === "" || value === "-";
 }
 
-// Merge backend snake_case response with frontend camelCase + styling
+function mergeMetricWithStyling(
+  metric: Metric | undefined,
+  config: Omit<MetricCard, keyof Metric>,
+): MetricCard {
+  return {
+    title: metric?.title || "",
+    value: isBlankMetricValue(metric?.value) ? 0 : Number(metric?.value),
+    unit: metric?.unit || "",
+    remarks: metric?.remarks || "",
+    ...config,
+    module: "procurement",
+  };
+}
+
+// Merge backend snake_case response with frontend camelCase + styling.
+// Field-level fallback keeps the dashboard usable while backend metrics are rolled out incrementally.
 function mergeWithStyling(
   response: ProcurementDashboardResponse,
 ): ProcurementDashboardData {
   return {
-    costSaving: {
-      ...response.cost_saving,
-      ...procurementMetricConfig.costSaving,
-    },
-    savingRate: {
-      ...response.saving_rate,
-      ...procurementMetricConfig.savingRate,
-    },
-    otdRate: {
-      ...response.otd_rate,
-      ...procurementMetricConfig.otdRate,
-    },
-    poCycleTime: {
-      ...response.po_cycle_time,
-      ...procurementMetricConfig.poCycleTime,
-    },
+    costSaving: mergeMetricWithStyling(
+      response.cost_saving,
+      procurementMetricConfig.costSaving,
+    ),
+    savingRate: mergeMetricWithStyling(
+      response.saving_rate,
+      procurementMetricConfig.savingRate,
+    ),
+    otdRate: mergeMetricWithStyling(
+      response.otd_rate,
+      procurementMetricConfig.otdRate,
+    ),
+    poCycleTime: mergeMetricWithStyling(
+      response.po_cycle_time,
+      procurementMetricConfig.poCycleTime,
+    ),
+    prNoPO: mergeMetricWithStyling(
+      response.pr_no_po,
+      procurementMetricConfig.prNoPO,
+    ),
+    poIncomplete: mergeMetricWithStyling(
+      response.po_incomplete,
+      procurementMetricConfig.poIncomplete,
+    ),
+    poNoReceiving: mergeMetricWithStyling(
+      response.po_no_receiving,
+      procurementMetricConfig.poNoReceiving,
+    ),
+    receivingCycleTime: mergeMetricWithStyling(
+      response.receiving_cycle_time,
+      procurementMetricConfig.receivingCycleTime,
+    ),
+    procurementCycleTime: mergeMetricWithStyling(
+      response.procurement_cycle_time,
+      procurementMetricConfig.procurementCycleTime,
+    ),
   };
 }
 
@@ -57,6 +92,7 @@ function mapFilters(filters?: ProcurementFilters) {
     period: filters.dateFilter,
     start: filters.dateRange?.startDate,
     end: filters.dateRange?.endDate,
+    search: filters.search,
   };
 }
 
@@ -75,9 +111,9 @@ export const procurementService = {
         },
       });
       return mergeWithStyling(data.data);
-    } catch {
-      const mockData = getMockProcurementDashboard();
-      return mergeWithStyling(mockData);
+    } catch (error) {
+      console.error("[getDashboard] Error:", error);
+      return mergeWithStyling(getMockProcurementDashboard());
     }
   },
   async getPOCycleTimeTrend(
@@ -92,7 +128,8 @@ export const procurementService = {
         },
       );
       return data.data;
-    } catch {
+    } catch (error) {
+      console.error("[getPOCycleTimeTrend] Error:", error);
       return getMockPOCycleTimeTrend();
     }
   },
@@ -107,8 +144,70 @@ export const procurementService = {
         params: { companyId, ...mapFilters(filters) },
       });
       return data.data;
-    } catch {
+    } catch (error) {
+      console.error("[getPurchaseTrendYTD] Error:", error);
       return getMockPurchaseTrendYTD();
+    }
+  },
+  async getReceivingCycleTimeTrend(
+    companyId: string,
+    filters?: ProcurementFilters,
+  ): Promise<TrendDataPoint[]> {
+    try {
+      const { data } = await apiClient.get<ApiEnvelope<TrendDataPoint[]>>(
+        "/procurement/receiving-cycle-time-trend",
+        {
+          params: { companyId, ...mapFilters(filters) },
+        },
+      );
+      return data.data;
+    } catch (error) {
+      console.error("[getReceivingCycleTimeTrend] Error:", error);
+      throw error;
+    }
+  },
+  async getProcurementCycleTimeTrend(
+    companyId: string,
+    filters?: ProcurementFilters,
+  ): Promise<TrendDataPoint[]> {
+    try {
+      const { data } = await apiClient.get<ApiEnvelope<TrendDataPoint[]>>(
+        "/procurement/procurement-cycle-time-trend",
+        {
+          params: { companyId, ...mapFilters(filters) },
+        },
+      );
+      return data.data;
+    } catch (error) {
+      console.error("[getProcurementCycleTimeTrend] Error:", error);
+      throw error;
+    }
+  },
+
+  async getDocuments(
+    companyId: string,
+    metric: MetricType,
+    page: number,
+    limit: number,
+    filters?: ProcurementFilters,
+  ): Promise<PaginatedDocuments> {
+    try {
+      const { data } = await apiClient.get<ApiEnvelope<PaginatedDocuments>>(
+        "/procurement/documents",
+        {
+          params: {
+            companyId,
+            metric,
+            page,
+            limit,
+            ...mapFilters(filters),
+          },
+        },
+      );
+      return data.data;
+    } catch (error) {
+      console.error("[getDocuments] Error:", error);
+      throw error;
     }
   },
 };

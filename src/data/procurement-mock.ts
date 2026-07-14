@@ -1,48 +1,36 @@
-import type { ProcurementDashboardResponse } from "@/types/procurement";
-
-export interface TrendDataPoint {
-  label: string;
-  value: number;
-}
-
-export interface PurchaseTrendYTDDataPoint {
-  label: string;
-  ytd_this_year: number;
-  ytd_last_year: number;
-  [key: string]: number | string;
-}
-
-// Minimal fallback mock, hanya dipakai jika backend tidak tersedia
-const fallbackDashboard: ProcurementDashboardResponse = {
-  company_id: 0,
-  cost_saving: {
-    title: "Cost Saving",
-    value: 0,
-    unit: "Rp. Million (Juta)",
-    remarks: "Nilai ekonomis hasil negosiasi PR vs PO",
-  },
-  saving_rate: {
-    title: "% Saving",
-    value: 0,
-    unit: "% Saving Rate",
-    remarks: "Persentase saving hasil negosiasi PR vs PO",
-  },
-  otd_rate: {
-    title: "On-Time Delivery Rate (OTD)",
-    value: 0,
-    unit: "% OTD Rate",
-    remarks: "Persentase penerimaan tepat waktu",
-  },
-  po_cycle_time: {
-    title: "Average PO Cycle Time",
-    value: 0,
-    unit: "Hari",
-    remarks: "Rata-rata waktu siklus Purchase Order",
-  },
-};
+import type {
+  ProcurementDashboardResponse,
+  TrendDataPoint,
+  PurchaseTrendYTDDataPoint,
+} from "@/types/procurement";
 
 export function getMockProcurementDashboard(): ProcurementDashboardResponse {
-  return fallbackDashboard;
+  return {
+    company_id: 0,
+    cost_saving: { title: "Cost Saving", value: 0, unit: "", remarks: "" },
+    saving_rate: { title: "Saving Rate", value: 0, unit: "", remarks: "" },
+    otd_rate: { title: "OTD Rate", value: 0, unit: "", remarks: "" },
+    po_cycle_time: { title: "PO Cycle Time", value: 0, unit: "", remarks: "" },
+    pr_no_po: { title: "PR No PO", value: 0, unit: "", remarks: "" },
+    po_incomplete: { title: "PO Incomplete", value: 0, unit: "", remarks: "" },
+    po_no_receiving: { title: "PO No Receiving", value: 0, unit: "", remarks: "" },
+    receiving_cycle_time: { title: "Receiving Cycle Time", value: 0, unit: "", remarks: "" },
+    procurement_cycle_time: { title: "Procurement Cycle Time", value: 0, unit: "", remarks: "" },
+  };
+}
+
+export function getMockPOCycleTimeTrend(): TrendDataPoint[] {
+  return [
+    { label: "Jan", value: 0 },
+    { label: "Feb", value: 0 },
+    { label: "Mar", value: 0 },
+  ];
+}
+
+export function getMockPurchaseTrendYTD(): PurchaseTrendYTDDataPoint[] {
+  return [
+    { label: "Jan", ytd_this_year: 0, ytd_last_year: 0 },
+  ];
 }
 
 export const procurementMetricConfig = {
@@ -70,12 +58,34 @@ export const procurementMetricConfig = {
     iconColor: "text-amber-600",
     cardId: "proc-tile-po-cycle-time",
   },
+  prNoPO: {
+    icon: "FileText",
+    iconBgColor: "bg-indigo-100",
+    iconColor: "text-indigo-600",
+    cardId: "proc-tile-pr-no-po",
+  },
+  poIncomplete: {
+    icon: "ShoppingCart",
+    iconBgColor: "bg-amber-100",
+    iconColor: "text-amber-600",
+    cardId: "proc-tile-po-incomplete",
+  },
+  poNoReceiving: {
+    icon: "Package",
+    iconBgColor: "bg-sky-100",
+    iconColor: "text-sky-600",
+    cardId: "proc-tile-po-no-receiving",
+  },
+  receivingCycleTime: {
+    icon: "Clock",
+    iconBgColor: "bg-green-100",
+    iconColor: "text-green-600",
+    cardId: "proc-tile-receiving-cycle-time",
+  },
+  procurementCycleTime: {
+    icon: "Clock",
+    iconBgColor: "bg-indigo-100",
+    iconColor: "text-indigo-600",
+    cardId: "proc-tile-procurement-cycle-time",
+  },
 };
-
-export function getMockPOCycleTimeTrend(): TrendDataPoint[] {
-  return [];
-}
-
-export function getMockPurchaseTrendYTD(): PurchaseTrendYTDDataPoint[] {
-  return [];
-}

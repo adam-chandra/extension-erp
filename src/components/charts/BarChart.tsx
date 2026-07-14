@@ -6,6 +6,7 @@ import {
   CartesianGrid,
   ResponsiveContainer,
 } from "recharts";
+import { useId } from "react";
 
 export interface BarChartData {
   name: string;
@@ -54,21 +55,27 @@ const CustomBarLabel = (props: any) => {
 };
 
 // Custom shape untuk bar dengan border radius
-const CustomBarShape = (props: any) => {
-  const { x, y, width, height, fill, borderRadius = 6 } = props;
-  return (
-    <rect
-      x={x}
-      y={y}
-      width={width}
-      height={height}
-      fill={fill}
-      rx={borderRadius}
-      ry={borderRadius}
-      className="transition-all duration-300 hover:opacity-80"
-    />
-  );
-};
+interface CustomBarShapeProps {
+  x?: number
+  y?: number
+  width?: number
+  height?: number
+  fill?: string
+  borderRadius?: number
+}
+
+const CustomBarShape = ({ x = 0, y = 0, width = 0, height = 0, fill, borderRadius = 6 }: CustomBarShapeProps) => (
+  <rect
+    x={x}
+    y={y}
+    width={width}
+    height={height}
+    fill={fill}
+    rx={borderRadius}
+    ry={borderRadius}
+    className="transition-all duration-300 hover:opacity-80"
+  />
+);
 
 // Palet gradient
 const GRADIENT_COLORS = {
@@ -111,7 +118,8 @@ export function BarChart({
   };
 
   const [color1, color2] = getGradientColors();
-  const gradientId = `gradient-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  const rawId = useId();
+  const gradientId = `gradient-${rawId.replace(/:/g, "")}`;
 
   return (
     <div className={`w-full ${className}`}>
@@ -173,9 +181,7 @@ export function BarChart({
             animationDuration={animated ? 1000 : 0}
             animationEasing="ease-in-out"
             label={showLabels ? <CustomBarLabel /> : false}
-            shape={(props: any) => (
-              <CustomBarShape {...props} borderRadius={borderRadius} />
-            )}
+            shape={<CustomBarShape borderRadius={borderRadius} />}
           />
         </ReBarChart>
       </ResponsiveContainer>

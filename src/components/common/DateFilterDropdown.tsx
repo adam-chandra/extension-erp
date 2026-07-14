@@ -1,6 +1,7 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useId } from "react";
 import { Calendar, ChevronDown } from "lucide-react";
 import type { DateFilterOption } from "@/types/procurement";
+
 
 const DATE_FILTER_LABELS: Record<DateFilterOption, string> = {
   all: "All Time",
@@ -13,13 +14,16 @@ export function DateFilterDropdown({
   value,
   onChange,
 }: {
-  value: DateFilterOption;
-  onChange: (v: DateFilterOption, start?: string, end?: string) => void;
+  readonly value: DateFilterOption;
+  readonly onChange: (v: DateFilterOption, start?: string, end?: string) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [customStart, setCustomStart] = useState("");
   const [customEnd, setCustomEnd] = useState("");
   const ref = useRef<HTMLDivElement>(null);
+  const uid = useId();
+  const startId = `date-start-${uid}`;
+  const endId = `date-end-${uid}`;
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -70,10 +74,11 @@ export function DateFilterDropdown({
           {value === "custom" && (
             <div className="border-t border-slate-100 px-4 py-3 flex flex-col gap-2">
               <div>
-                <label className="block text-xs font-medium text-slate-500 mb-1">
+                <label htmlFor={startId} className="block text-xs font-medium text-slate-500 mb-1">
                   Start Date
                 </label>
                 <input
+                  id={startId}
                   type="date"
                   value={customStart}
                   onChange={(e) => setCustomStart(e.target.value)}
@@ -81,10 +86,11 @@ export function DateFilterDropdown({
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-500 mb-1">
+                <label htmlFor={endId} className="block text-xs font-medium text-slate-500 mb-1">
                   End Date
                 </label>
                 <input
+                  id={endId}
                   type="date"
                   value={customEnd}
                   onChange={(e) => setCustomEnd(e.target.value)}

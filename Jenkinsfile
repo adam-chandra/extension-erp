@@ -1,18 +1,25 @@
 pipeline {
     agent any
 
+    tools {
+        nodejs 'NodeJS-Jenkins'
+    }
+
     environment {
         // --- CONFIG ---
         DOCKER_USER  = "dockerdevopsethos"
         APP_NAME     = "fe-extension-erp-dev"
         IMAGE_TAG    = "${DOCKER_USER}/${APP_NAME}:${BUILD_NUMBER}"
         LATEST_TAG   = "${DOCKER_USER}/${APP_NAME}:latest"
-        
+
         // --- SERVER TUJUAN ---
         DEPLOY_USER  = "root"
-        DEPLOY_HOST  = "89.21.85.2" 
-        DEPLOY_DIR   = "/var/www/html/fe-extension-erp"
-        
+        DEPLOY_HOST  = "182.253.236.139"
+        DEPLOY_DIR   = "/var/www/html/fe-extension-erp-dev"
+        DEPLOY_PORT  = "9194" // published port sesuai docker-compose.yml
+        DEPLOY_URL   = "dev-extension-hashmicro.ethos.co.id"
+        CONTAINER_NAME = "fe-extension-erp-dev" // sesuai container_name di docker-compose.yml
+
         // --- CREDENTIALS ID ---
         DOCKER_CREDS = credentials('docker-hub-login')
         ENV_SECRET   = credentials('ENV-FE-HM-DEV') // File rahasia .env
@@ -52,25 +59,40 @@ pipeline {
                 script {
                     echo "🔨 Building React application..."
                     sh 'npm run build'
-                    
+
                     // Verify build output
                     sh 'ls -la dist/'
                 }
             }
         }
 
-        stage('5. SonarQube Analysis') {
+        stage('5. Test Coverage') {
             steps {
                 script {
-                    def scannerHome = tool 'SonarScanner' 
-                    withSonarQubeEnv('SONAR-FE-EXTENSION-DEV') { 
+                    echo "🧪 Running tests with coverage..."
+                    sh 'npm run test:coverage'
+                }
+            }
+            post {
+                always {
+                    // Simpan laporan coverage sebagai artifact Jenkins
+                    archiveArtifacts artifacts: 'coverage/**', allowEmptyArchive: true
+                }
+            }
+        }
+
+        stage('6. SonarQube Analysis') {
+            steps {
+                script {
+                    def scannerHome = tool 'SonarScanner'
+                    withSonarQubeEnv('SONAR-FE-EXTENSION-DEV') {
                         sh "${scannerHome}/bin/sonar-scanner"
                     }
                 }
             }
         }
 
-        stage('6. Quality Gate') {
+        stage('7. Quality Gate') {
             steps {
                 script {
                     timeout(time: 2, unit: 'MINUTES') {
@@ -80,16 +102,16 @@ pipeline {
             }
         }
 
-        stage('7. Build & Push Docker') {
+        stage('8. Build & Push Docker') {
             steps {
                 script {
                     echo "🐳 Building Docker image..."
                     sh "docker build -t ${IMAGE_TAG} ."
                     sh "docker tag ${IMAGE_TAG} ${LATEST_TAG}"
-                    
+
                     echo "📤 Pushing to Docker Hub..."
                     withCredentials([usernamePassword(credentialsId: 'docker-hub-login', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
-                        sh "echo $PASS | docker login -u $USER --password-stdin"
+                        sh "echo \$PASS | docker login -u \$USER --password-stdin"
                         sh "docker push ${IMAGE_TAG}"
                         sh "docker push ${LATEST_TAG}"
                     }
@@ -97,17 +119,17 @@ pipeline {
             }
         }
 
-        stage('8. Deploy Production (SSH)') {
+        stage('9. Transfer Files to Server (SCP)') {
             steps {
                 sshagent([SSH_CREDS_ID]) {
                     script {
                         // ---------------------------------------------------------
                         // LANGKAH 1: PERSIAPAN FILE .ENV
                         // ---------------------------------------------------------
-                        
+
                         // A. BACA isi file rahasia dari Jenkins (Bukan path-nya)
                         def secretContent = readFile(file: ENV_SECRET)
-                        
+
                         // B. Gabungkan isi rahasia + Variable Image Tag
                         def finalEnvContent = "${secretContent}\nFULL_IMAGE_NAME=${LATEST_TAG}"
 
@@ -121,38 +143,122 @@ pipeline {
                         // ---------------------------------------------------------
                         // LANGKAH 2: KIRIM FILE KE SERVER
                         // ---------------------------------------------------------
-                        // Kirim docker-compose dan .env ke server
+                        echo "📁 Mengirim docker-compose.yml dan .env ke server..."
                         sh "scp -o StrictHostKeyChecking=no docker-compose.yml .env ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_DIR}/"
-                        
+                        echo "✅ Transfer file selesai."
+                    }
+                }
+            }
+        }
+
+        stage('10. Deploy Production (SSH)') {
+            steps {
+                sshagent([SSH_CREDS_ID]) {
+                    script {
                         // ---------------------------------------------------------
-                        // LANGKAH 3: EKSEKUSI DOCKER DI SERVER
+                        // EKSEKUSI DOCKER DI SERVER
+                        // set -e: begitu ada command gagal, langsung stop & exit non-zero
                         // ---------------------------------------------------------
                         sh """
                             ssh -o StrictHostKeyChecking=no ${DEPLOY_USER}@${DEPLOY_HOST} '
+                                set -e
                                 cd ${DEPLOY_DIR}
                                 echo "🚀 Connected to Server..."
-                                
-                                # Matikan container lama
+
+                                echo "--- Membersihkan container lama yang mungkin bentrok nama ---"
+                                docker rm -f ${CONTAINER_NAME} 2>/dev/null || true
+
+                                echo "--- Menghentikan container project (jika ada) ---"
                                 docker compose down --remove-orphans
-                                
-                                # Pull image baru (Docker akan baca FULL_IMAGE_NAME dari .env)
+
+                                echo "--- Menarik image terbaru ---"
                                 docker compose pull
-                                
-                                # Nyalakan container
-                                docker compose up -d
-                                
-                                # Verifikasi container berjalan
-                                docker compose ps
-                                
-                                echo "✅ Deployment Selesai!"
+
+                                echo "--- Menyalakan container ---"
+                                docker compose up -d --force-recreate --remove-orphans
+
+                                echo "✅ Deploy command selesai dieksekusi"
                             '
                         """
                     }
                 }
             }
         }
+
+        stage('11. Verify Deployment') {
+            steps {
+                sshagent([SSH_CREDS_ID]) {
+                    script {
+                        // ---------------------------------------------------------
+                        // VERIFIKASI: cek container running + health check HTTP
+                        // Kalau gagal, stage ini FAILED -> pipeline stop, tidak lanjut ke post{success}
+                        // ---------------------------------------------------------
+                        sh """
+                            ssh -o StrictHostKeyChecking=no ${DEPLOY_USER}@${DEPLOY_HOST} '
+                                set -e
+                                cd ${DEPLOY_DIR}
+
+                                echo "--- Container Status ---"
+                                docker compose ps
+
+                                echo "--- Checking container health ---"
+                                RUNNING=\$(docker compose ps --status running -q | wc -l)
+                                if [ "\$RUNNING" -eq 0 ]; then
+                                    echo "❌ Tidak ada container yang running!"
+                                    exit 1
+                                fi
+                                echo "✅ Container running: \$RUNNING"
+
+                                echo "--- HTTP Health Check (localhost:${DEPLOY_PORT}) ---"
+                                LOCAL_OK=0
+                                for i in 1 2 3 4 5; do
+                                    STATUS=\$(curl -s -o /dev/null -w "%{http_code}" http://localhost:${DEPLOY_PORT} || echo "000")
+                                    echo "Attempt \$i - HTTP Status: \$STATUS"
+                                    if [ "\$STATUS" = "200" ] || [ "\$STATUS" = "301" ] || [ "\$STATUS" = "302" ]; then
+                                        echo "✅ Container merespon dengan baik (HTTP \$STATUS)"
+                                        LOCAL_OK=1
+                                        break
+                                    fi
+                                    sleep 5
+                                done
+
+                                if [ "\$LOCAL_OK" -eq 0 ]; then
+                                    echo "❌ Container tidak merespon setelah 5x percobaan"
+                                    exit 1
+                                fi
+                            '
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('12. Verify Public Domain') {
+            steps {
+                script {
+                    // ---------------------------------------------------------
+                    // Cek dari Jenkins ke domain publik (via reverse proxy/DNS)
+                    // Memastikan domain benar-benar reachable dari luar server,
+                    // bukan cuma container hidup secara lokal.
+                    // ---------------------------------------------------------
+                    sh """
+                        for i in 1 2 3 4 5; do
+                            STATUS=\$(curl -sk -o /dev/null -w "%{http_code}" https://${DEPLOY_URL} || echo "000")
+                            echo "Attempt \$i - HTTP Status (https://${DEPLOY_URL}): \$STATUS"
+                            if [ "\$STATUS" = "200" ] || [ "\$STATUS" = "301" ] || [ "\$STATUS" = "302" ]; then
+                                echo "✅ Domain merespon dengan baik (HTTP \$STATUS)"
+                                exit 0
+                            fi
+                            sleep 5
+                        done
+                        echo "❌ Domain ${DEPLOY_URL} tidak merespon setelah 5x percobaan"
+                        exit 1
+                    """
+                }
+            }
+        }
     }
-        
+
     post {
         always {
             script {
@@ -167,7 +273,7 @@ pipeline {
             echo "🎉 Image: ${LATEST_TAG}"
         }
         failure {
-            echo "❌ Deployment Gagal. Cek log di atas untuk detail error."
+            echo "❌ Deployment Gagal. Cek log stage yang berwarna merah untuk detail error."
         }
     }
 }

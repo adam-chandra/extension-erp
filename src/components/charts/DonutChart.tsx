@@ -106,9 +106,9 @@ export function DonutChart({
             label={showPercentageOnChart ? renderPercentageLabel : undefined}
             labelLine={false}
           >
-            {data.map((entry, index) => (
+            {data.map((entry) => (
               <Cell 
-                key={`cell-${index}`} 
+                key={entry.label} 
                 fill={entry.color}
                 className="transition-opacity hover:opacity-80 cursor-pointer"
               />

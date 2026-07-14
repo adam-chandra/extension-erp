@@ -1,9 +1,10 @@
-import { useState, useRef, useEffect, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Building, Calendar, ChevronDown, CreditCard, Wallet, PackageMinus, Receipt } from 'lucide-react'
+import { Building, CreditCard, Wallet, PackageMinus, Receipt } from 'lucide-react'
 import { TileCard } from '@/components/common/TileCard'
 import { MultiSeriesLineChartCard } from '@/components/common/MultiSeriesLineChartCard'
 import { ListViewCard } from '@/components/common/ListViewCard'
+import { DateFilterDropdown } from '@/components/common/DateFilterDropdown'
 import { ROUTES } from '@/config/routes'
 import {
   withWorkspaceLayout,
@@ -13,136 +14,16 @@ import {
   useFinanceDashboard,
   useFinanceReturnsByAccount,
 } from '@/hooks/useFinanceDashboard'
-import type { DashboardPeriod, DashboardDateRange } from '@/services/finance.service'
+import { formatIDR, formatMonthLabel, RETUR_PENJUALAN_COLUMNS } from '@/utils/finance'
+import type { DashboardDateRange, DashboardPeriod } from '@/services/finance.service'
+import type { DateFilterOption } from '@/types/procurement'
 
-type DateFilterOption = DashboardPeriod
-
-const DATE_FILTER_LABELS: Record<DateFilterOption, string> = {
-  all: 'All Time',
-  month: 'This Month',
-  year: 'This Year',
-  custom: 'Custom Range',
-}
-
-function DateFilterDropdown({
-  value,
-  range,
-  onChange,
-}: {
-  value: DateFilterOption
-  range: DashboardDateRange
-  onChange: (v: DateFilterOption, r: DashboardDateRange) => void
-}) {
-  const [open, setOpen] = useState(false)
-  const [draftStart, setDraftStart] = useState(range.start ?? '')
-  const [draftEnd, setDraftEnd] = useState(range.end ?? '')
-  const ref = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClick)
-    return () => document.removeEventListener('mousedown', handleClick)
-  }, [])
-
-  const options: DateFilterOption[] = ['all', 'year', 'month', 'custom']
-
-  return (
-    <div ref={ref} className="relative inline-block">
-      <button
-        onClick={() => setOpen((o) => !o)}
-        className="flex items-center gap-2 rounded-md border border-primary bg-white px-3 py-1.5 text-sm font-medium text-primary shadow-sm hover:bg-primary/5 transition-colors"
-      >
-        <Calendar className="h-4 w-4" />
-        <span>{DATE_FILTER_LABELS[value]}</span>
-        <ChevronDown className={`h-4 w-4 transition-transform ${open ? 'rotate-180' : ''}`} />
-      </button>
-
-      {open && (
-        <div className="absolute right-0 z-50 mt-1 w-56 rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
-          {options.map((opt) => (
-            <button
-              key={opt}
-              onClick={() => {
-                if (opt !== 'custom') {
-                  onChange(opt, {})
-                  setOpen(false)
-                } else {
-                  onChange(opt, { start: draftStart, end: draftEnd })
-                }
-              }}
-              className={`flex w-full items-center px-4 py-2 text-sm transition-colors hover:bg-primary/5 ${
-                value === opt ? 'font-semibold text-primary' : 'text-slate-700'
-              }`}
-            >
-              {DATE_FILTER_LABELS[opt]}
-            </button>
-          ))}
-
-          {value === 'custom' && (
-            <div className="border-t border-slate-100 px-4 py-3 flex flex-col gap-2">
-              <div>
-                <label className="block text-xs font-medium text-slate-500 mb-1">Start Date</label>
-                <input
-                  type="date"
-                  value={draftStart}
-                  onChange={(e) => setDraftStart(e.target.value)}
-                  className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm text-slate-700 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-500 mb-1">End Date</label>
-                <input
-                  type="date"
-                  value={draftEnd}
-                  onChange={(e) => setDraftEnd(e.target.value)}
-                  className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm text-slate-700 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                />
-              </div>
-              <button
-                disabled={!draftStart || !draftEnd}
-                onClick={() => {
-                  onChange('custom', { start: draftStart, end: draftEnd })
-                  setOpen(false)
-                }}
-                className="mt-1 w-full rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                Apply
-              </button>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  )
-}
-
-function formatIDR(value: number): string {
-  if (!Number.isFinite(value)) return 'Rp 0'
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    maximumFractionDigits: 0,
-  }).format(value)
-}
-
-function formatMonthLabel(monthIso: string): string {
-  const [y, m] = monthIso.split('-')
-  const date = new Date(Number(y), Number(m) - 1, 1)
-  const short = date.toLocaleString('id-ID', { month: 'short' })
-  return `${short} '${y.slice(-2)}`
-}
-
-// Scale large IDR values to billions for chart readability.
 function scaleForChart(value: number): number {
   return Math.round((value / 1_000_000_000) * 100) / 100
 }
 
 function FinanceAccountingDashboardContent({ selectedCompany }: WorkspaceLayoutInjectedProps & { selectedCompany?: string }) {
-  const [dateFilter, setDateFilter] = useState<DateFilterOption>('all')
+  const [dateFilter, setDateFilter] = useState<DashboardPeriod>('all')
   const [customRange, setCustomRange] = useState<DashboardDateRange>({})
   const navigate = useNavigate()
 
@@ -187,11 +68,10 @@ function FinanceAccountingDashboardContent({ selectedCompany }: WorkspaceLayoutI
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-bold text-slate-900">DASHBOARD FINANCE & ACCOUNTING</h1>
         <DateFilterDropdown
-          value={dateFilter}
-          range={customRange}
-          onChange={(v, r) => {
-            setDateFilter(v)
-            setCustomRange(r)
+          value={dateFilter as DateFilterOption}
+          onChange={(v, start, end) => {
+            setDateFilter(v as DashboardPeriod)
+            setCustomRange(v === 'custom' ? { start: start ?? '', end: end ?? '' } : {})
           }}
         />
       </div>
@@ -267,19 +147,7 @@ function FinanceAccountingDashboardContent({ selectedCompany }: WorkspaceLayoutI
             nilaiRetur: r.balance,
             persentaseRetur: `${r.percentage.toFixed(1)}%`,
           }))}
-          columns={[
-            { key: 'no', label: 'No', width: '60px', align: 'center' },
-            { key: 'code', label: 'COA', width: '110px', align: 'left' },
-            { key: 'deskripsi', label: 'Deskripsi', align: 'left' },
-            {
-              key: 'nilaiRetur',
-              label: 'Nilai Retur',
-              width: '180px',
-              align: 'right',
-              render: (value) => formatIDR(value as number),
-            },
-            { key: 'persentaseRetur', label: '% Retur', width: '100px', align: 'center' },
-          ]}
+          columns={RETUR_PENJUALAN_COLUMNS('60px', '180px')}
           pagination={true}
           itemsPerPage={10}
           cardId="fin-list-retur-penjualan"
